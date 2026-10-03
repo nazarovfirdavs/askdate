@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Date Invitation 💕</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 40px 30px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(255, 100, 150, 0.3);
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  h1 { color: #e91e63; font-size: 28px; margin-bottom: 15px; }
+
+  .emoji { font-size: 60px; margin-bottom: 20px; display: block; }
+
+  p { color: #555; margin-bottom: 25px; font-size: 17px; line-height: 1.6; }
+
+  .field { margin-bottom: 20px; text-align: left; }
+
+  label {
+    display: block;
+    color: #e91e63;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #f8bbd0;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+    background: #fff5f8;
+  }
+
+  input:focus, select:focus {
+    border-color: #e91e63;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.1);
+  }
+
+  .btn-yes {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #e91e63, #ff6090);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+  }
+
+  .btn-yes:hover { transform: scale(1.03); box-shadow: 0 10px 25px rgba(233, 30, 99, 0.4); }
+  .btn-yes:disabled { opacity: 0.6; cursor: wait; }
+
+  .btn-no {
+    width: 100%;
+    padding: 14px;
+    background: #eee;
+    color: #999;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: not-allowed;
+    margin-top: 10px;
+    transition: 0.3s;
+  }
+
+  .final { display: none; animation: pop 0.5s ease; }
+
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .final h1 { font-size: 32px; }
+
+  .details {
+    background: #fff5f8;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+  }
+
+  .details div { margin: 10px 0; color: #333; font-size: 16px; }
+  .details span { color: #e91e63; font-weight: 700; }
+
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    animation: fall linear forwards;
+    z-index: 999;
+  }
+
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(720deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="mainCard">
+  <span class="emoji">💌</span>
+  <h1>I have a very important question...</h1>
+  <p>Will you go on a date with me? Pick when and what we'll do 😊</p>
+
+  <div class="field">
+    <label>📅 Date</label>
+    <input type="date" id="date">
+  </div>
+
+  <div class="field">
+    <label>🕐 Time</label>
+    <input type="time" id="time" value="18:00">
+  </div>
+
+  <div class="field">
+    <label>💫 What should we do?</label>
+    <select id="activity">
+      <option>☕ Coffee and long talks</option>
+      <option>🍕 Dinner at a cozy place</option>
+      <option>🎬 Movie and popcorn</option>
+      <option>🚶 A walk in the park</option>
+      <option>🎡 Amusement park</option>
+      <option>🍦 A walk and ice cream</option>
+      <option>🎨 A workshop together</option>
+    </select>
+  </div>
+
+  <button class="btn-yes" id="yesBtn" onclick="confirmDate()">Yes, I'm in 💖</button>
+  <button class="btn-no" id="noBtn">No (doesn't work)</button>
+</div>
+
+<div class="card final" id="finalCard">
+  <span class="emoji">🥰</span>
+  <h1>Yay! I knew you'd say yes!</h1>
+  <p>It's a date! Already counting the minutes 💕</p>
+  <div class="details">
+    <div>📅 <span id="outDate"></span></div>
+    <div>🕐 <span id="outTime"></span></div>
+    <div>💫 <span id="outActivity"></span></div>
+  </div>
+  <p style="color:#e91e63; font-weight:600;">All you need to bring is a good mood 😘</p>
+</div>
+
+<script>
+
+  const TELEGRAM_BOT_TOKEN = "8553168499:AAG1jplSSbEZMeRUuPiUf7Nk7jWTFgi9k1Y";  
+  const TELEGRAM_CHAT_ID   = "7313150382";    
+
+  const noBtn = document.getElementById('noBtn');
+  const messages = ["Doesn't work 😜", "Button is broken 🙈", "Try again 😄", "Only 'Yes' works 💕"];
+  let i = 0;
+
+  noBtn.addEventListener('mouseover', () => {
+    noBtn.style.transform = `translate(${Math.random()*200-100}px, ${Math.random()*60-30}px)`;
+    noBtn.textContent = messages[i++ % messages.length];
+  });
+
+  noBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    alert("This button doesn't work 😄 Hit 'Yes'!");
+  });
+
+  async function confirmDate() {
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
+    const activity = document.getElementById('activity').value;
+
+    if (!date) {
+      alert('Please pick a date 💕');
+      return;
+    }
+
+    const yesBtn = document.getElementById('yesBtn');
+    yesBtn.disabled = true;
+    yesBtn.textContent = 'Sending...';
+
+    const d = new Date(date);
+    const formatted = d.toLocaleDateString('en-US', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    const message =
+      `💘 She said YES!\n\n` +
+      `📅 Date: ${formatted}\n` +
+      `🕐 Time: ${time}\n` +
+      `💫 Activity: ${activity}`;
+
+
+    try {
+      await fetch(`https://muddy-poetry-1e28.nfirdavs391.workers.dev/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
+      });
+    } catch (err) {
+      console.error('Telegram send failed:', err);
+    }
+
+
+
+    document.getElementById('outDate').textContent = formatted;
+    document.getElementById('outTime').textContent = time;
+    document.getElementById('outActivity').textContent = activity;
+
+    document.getElementById('mainCard').style.display = 'none';
+    document.getElementById('finalCard').style.display = 'block';
+
+    launchConfetti();
+  }
+
+  function launchConfetti() {
+    const colors = ['#e91e63', '#ff6090', '#ffc107', '#4caf50', '#2196f3', '#9c27b0'];
+    for (let n = 0; n < 80; n++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      c.style.animationDelay = Math.random() * 0.5 + 's';
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5000);
+    }
+  }
+</script>
+
+</body>
+</html>
